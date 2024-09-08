@@ -1,6 +1,7 @@
 import sys
 import time
-import random
+import matplotlib.pyplot as plt
+
 
 vypujcene_knihy = ["1984", "Nesnesitelná lehkost bytí", "Na cestě", "Malý princ", "Anna Karenina", "Sto roků samoty"]
 uzivatele = ["Kuba", "Petr", "Lucie", "Jana", "Marie", "Tom"]
@@ -206,6 +207,9 @@ books_dict = {
     }
 }
 
+
+
+
 while True:
     otazka = int(input("Vítej v mém programu, kde si můžeš spravovat svoji knihovnu, Co chceš zvolit? (Napiš číslo)\n1. Přidat knihu\n2. Odstranit knihu\n3. Registrovat nového uživatele\n4. Vyhledat knihu\n5. Vypůjčit knihu\n"))
 
@@ -228,11 +232,12 @@ while True:
             time.sleep(2)
             continue
 
+
     #2 Odstranit knihu
     if otazka == 2:
         print("Toto jsou knihy, které máme v databázi:")
         print(', '.join(map(str, books_list)))
-        odstranit_knihu = str(input("Jakou knihu si přeješ odstranit?"))
+        odstranit_knihu = str(input("Jakou knihu si přeješ odstranit? "))
         if odstranit_knihu in books_list:
             books_list.remove(odstranit_knihu)
             del books_dict[odstranit_knihu]
@@ -244,7 +249,41 @@ while True:
             time.sleep(2)
             continue
 
-    #Vyhledat knihu
+
+    #3 Registrovat nového uživatele
+    if otazka == 3:
+        jmeno = str(input("Napiš jméno nového uživatele: "))
+        uzivatele.append(jmeno)
+        nove_uzivatele_detaily = {}
+        nove_uzivatele_detaily["Jméno"] = jmeno
+        nove_uzivatele_detaily["Identifikační číslo"] = str(input("Napiš identifikační číslo: "))
+        nove_uzivatele_detaily["Vypujcene_knihy"] = []
+        if any(nove_uzivatele_detaily["Identifikační číslo"] == details["Identifikační číslo"] for details in uzivatele_knihy.values()):
+            print("Takové identifikační číslo už je v naší databázi.\n")
+            time.sleep(2)
+        else:
+            nove_uzivatele_detaily["Vypujcene_knihy"] = []
+            uzivatele_knihy[jmeno] = nove_uzivatele_detaily
+            print("Uživatel byl úspěšně přidán.\n")
+            time.sleep(2)
+            continue
+            #     break
+
+            # elif nove_uzivatele_detaily["Identifikační číslo"] not in uzivatele_knihy:
+            #     nove_uzivatele_detaily["Vypujcene_knihy"] = []
+            #     uzivatele_knihy[jmeno] = nove_uzivatele_detaily
+            #     print("Uživatel byl úspěšně přidán.\n")
+            #     time.sleep(2)
+            #     continue
+        
+        # if nove_uzivatele_detaily["Identifikační číslo"] in uzivatele_knihy:
+        #     print("Takové identifikační číslo už je v naší databázi.\n")
+        #     time.sleep(2)
+        #     continue
+
+
+
+    #4 Vyhledat knihu
     if otazka == 4:
         vyhledavana_kniha = str(input("Jakou knihu hledáš? Chceš hledat podle názvu knihy nebo autora? (kniha/autor) "))
         if vyhledavana_kniha == "kniha":
@@ -283,6 +322,87 @@ while True:
                     time.sleep(2)
                     print("Nemáme u nás žádnou knihu od tohoto autora.")
                     break
+
+    #5 Vypůjčit knihu
+    if otazka == 5:
+        knihy_k_dispozici = []
+        for key, value in books_dict.items():
+            if value.get("Dostupnost") == True:
+                knihy_k_dispozici.append(key)
+
+            if value.get("Dostupnost") == False:
+                continue
+        
+        print("Zde jsou naše aktuální knihy k dispozici:")
+        print(', '.join(knihy_k_dispozici))
+
+        #Sloupcový graf
+
+        # Vytvoření slovníku pro autory a počet dostupných knih
+        autori_dostupne_knihy = {}
+
+        for key, value in books_dict.items():
+            if value.get("Dostupnost") == True:
+                autor = value.get("Autor")
+                if autor in autori_dostupne_knihy:
+                    autori_dostupne_knihy[autor] += 1
+                else:
+                    autori_dostupne_knihy[autor] = 1
+
+            if value.get("Dostupnost") == False:
+                autor = value.get("Autor")
+                if autor in autori_dostupne_knihy:
+                    autori_dostupne_knihy[autor] = 0
+                else:
+                    autori_dostupne_knihy[autor] = 0
+
+        # Rozdělení dat do os X a Y
+        x = list(autori_dostupne_knihy.keys())
+        y = list(autori_dostupne_knihy.values())
+
+        # Vytvoření sloupcového grafu
+        plt.bar(x, y, color='blue', label='Počet dostupných knih')
+
+        plt.xlabel('Autoři')
+        plt.ylabel('Počet dostupných knih')
+        plt.title('Počet dostupných knih podle autorů')
+        plt.legend()
+        plt.xticks(rotation=45, ha='right')
+        plt.tight_layout()
+
+        # Zobrazení grafu
+        plt.show()
+
+
+
+        
+        kniha = str(input("Jakou knihu chceš půjčit? "))
+        if kniha in knihy_k_dispozici:
+            jmeno = str(input("Jak se jmenuješ? "))
+            if jmeno in uzivatele:
+                vypujcene_knihy.append(kniha)
+                for key, value in uzivatele_knihy.items():
+                    if jmeno in value.values():
+                        value["Vypujcene_knihy"].append(kniha)
+                        books_dict[kniha]["Dostupnost"] = False
+                        knihy_k_dispozici.remove(kniha)
+                        print("Kniha byla úspěšně vypůjčena.\n")
+                        time.sleep(2)
+                        continue
+                        
+
+            if jmeno not in uzivatele:
+                print("Takový uživatel u nás není zaregistrovaný.\n")
+                time.sleep(2)
+                continue
+
+        elif kniha not in knihy_k_dispozici:
+            print("Takovou knihu u nás nemáme k dispozici.\n")
+            time.sleep(2)
+            continue
+
+
+    
                     
             
 
