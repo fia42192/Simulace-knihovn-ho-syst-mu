@@ -338,7 +338,6 @@ while True:
 
         #Sloupcový graf
 
-        # Vytvoření slovníku pro autory a počet dostupných knih
         autori_dostupne_knihy = {}
 
         for key, value in books_dict.items():
@@ -349,12 +348,12 @@ while True:
                 else:
                     autori_dostupne_knihy[autor] = 1
 
-            if value.get("Dostupnost") == False:
-                autor = value.get("Autor")
-                if autor in autori_dostupne_knihy:
-                    autori_dostupne_knihy[autor] = 0
-                else:
-                    autori_dostupne_knihy[autor] = 0
+            # if value.get("Dostupnost") == False:
+            #     autor = value.get("Autor")
+            #     if autor in autori_dostupne_knihy:
+            #         autori_dostupne_knihy[autor] = 0
+            #     else:
+            #         autori_dostupne_knihy[autor] = 0
 
         # Rozdělení dat do os X a Y
         x = list(autori_dostupne_knihy.keys())
@@ -366,6 +365,27 @@ while True:
         plt.xlabel('Autoři')
         plt.ylabel('Počet dostupných knih')
         plt.title('Počet dostupných knih podle autorů')
+        plt.legend()
+        plt.xticks(rotation=45, ha='right')
+        plt.tight_layout()
+
+        # Zobrazení grafu
+        plt.show()
+
+
+
+
+
+
+        x2 = list(uzivatele_knihy.keys())
+        y2 = list(map(lambda x: len(x["Vypujcene_knihy"]), uzivatele_knihy.values()))
+
+        # Vytvoření sloupcového grafu
+        plt.bar(x2, y2, color='blue', label='Počet dostupných knih')
+
+        plt.xlabel('Uživatelé')
+        plt.ylabel('Počet vypůjčených knih')
+        plt.title('Počet vypůjčených knih podle uživatelů')
         plt.legend()
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
